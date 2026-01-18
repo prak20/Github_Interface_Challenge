@@ -1,7 +1,8 @@
+import re
 import pytest
 from playwright.sync_api import expect
 from config import REPO_UI_URL
-from conftest import logger 
+from helpers import log_step
 from helpers import parse_star_count
 
 
@@ -10,23 +11,55 @@ from helpers import parse_star_count
     {"name": "vscode", "owner": "microsoft", "stars": ">100k", "readme_visible": True}
 ])
 def test_repo_page_loads(page, repo_data):
-    logger.info(f"Loading {repo_data['name']} repo, hmmm?")
+    log_step(f"Loading {repo_data['name']} repo, hmmm?")
     page.goto(REPO_UI_URL)
     
     expect(page.get_by_role("heading", name=repo_data["name"])).to_be_visible()
-    logger.info("Repository name verified!")
+    log_step("Repository name verified!")
     
     expect(page.locator("span[itemprop='author']")).to_contain_text(repo_data["owner"])
-    logger.info("Owner confirmed, microsoft it is.")
+    log_step("Owner confirmed, microsoft it is.")
     
     star_text = page.locator("#repo-stars-counter-star").inner_text()
     stars = parse_star_count(star_text)
-    assert stars > 100000, f"Expected >100k stars, got {stars}"
-    logger.info(f"Star count {stars} > 100k, popular this repo is.")
+    assert stars > 100000, f"Expected {repo_data['stars']} stars, got {stars}"
+    log_step(f"Star count {stars} > 100k, popular this repo is.")
 
 
     expect(page.locator("#repo-network-counter")).to_be_visible()
-    logger.info("Fork count visible, many forks there are.")
+    log_step("Fork count visible, many forks there are.")
 
     expect(page.locator('span[data-content="README"]')).to_be_visible()
-    logger.info("README rendered, markdown magic works.")
+    log_step("README rendered, markdown magic works.")
+
+
+def test_code_navigation_and_typescript_file(page):
+    page.goto(REPO_UI_URL)
+
+    log_step("Navigating to src folder")
+    # Yeh commit links ko filter out kar dega
+    page.get_by_role("link", name="src, (Directory)").first.click()    
+    page.wait_for_url("**/src")
+    log_step("URL changed to show content inside src folder")
+
+    breadcrumb_src = page.get_by_role("heading", name="src")
+    expect(breadcrumb_src).to_be_visible()
+
+    log_step("Opening a TypeScript file")
+
+    ts_href = page.locator("a[aria-label$='.ts, (File)']").first.get_attribute("href")
+    assert ts_href is not None
+    page.goto(f"https://github.com{ts_href}")
+    log_step("Opened TS File")
+
+    code = page.locator("div.react-code-lines >> div.react-code-text").first
+    expect(code).to_be_visible()
+    line_numbers = page.locator("div.react-line-number")
+    expect(line_numbers.first).to_be_visible()
+    assert line_numbers.count() > 0
+
+
+
+
+
+
