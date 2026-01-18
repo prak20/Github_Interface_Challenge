@@ -35,3 +35,15 @@ def log_test_start_and_end(request):
     logger.info(f"Finished test: {request.node.name}")
 
 
+@pytest.fixture(scope="session")
+def api_context(playwright):
+    """
+    API ke liye ek context banana hai,
+    reuse karna powerful hota hai.
+    """
+    context = playwright.request.new_context(
+        base_url="https://api.github.com"
+    )
+    yield context
+    context.dispose()
+
