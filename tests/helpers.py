@@ -1,4 +1,4 @@
-from loguru import logger
+from conftest import logger
 
 def parse_star_count(star_text: str) -> int:
     """Convert star text like '123k' or '12,345' to integer, hmmm."""
