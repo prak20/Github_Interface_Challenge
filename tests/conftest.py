@@ -5,10 +5,14 @@ import os
 import sys
 import asyncio
 from typing import Generator
-from config import REPO_API_BASE,LOG_FILE
+from config import REPO_API_BASE, LOG_FILE
 
 # Setup logging - file and console
 os.makedirs("logs", exist_ok=True)
+
+# Clear previous log file by truncating
+open(LOG_FILE, 'w').close()
+
 logger.remove()
 # File logging with rotation
 logger.add(f"{LOG_FILE}", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="5 MB", enqueue=True, serialize=False)
