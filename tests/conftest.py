@@ -1,27 +1,29 @@
 from loguru import logger
-from playwright.sync_api import Page, expect, sync_playwright
+from playwright.sync_api import Page, expect, Playwright
 import pytest
 import os
 import sys
+import asyncio
+from typing import Generator
 
 # Setup logging
 os.makedirs("logs", exist_ok=True)
 logger.remove()
 logger.add("logs/tests.log",format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="5 MB", enqueue=True, serialize=False)
 
-
-
 @pytest.fixture(scope="session")
-def browser_context():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=500)
-        yield browser
-        browser.close()
+def browser_context(playwright: Playwright):
+    """Create a browser context from the playwright instance."""
+    browser = playwright.chromium.launch(headless=False, slow_mo=500)
+    context = browser.new_context()
+    yield context
+    context.close()
+    browser.close()
 
 @pytest.fixture(scope="function")
 def page(browser_context):
-    context = browser_context.new_context()
-    page = context.new_page()
+    """Create a new page for each test."""
+    page = browser_context.new_page()
     logger.info("New page opened for test isolation")
     yield page
     page.close()
@@ -33,7 +35,6 @@ def log_test_start_and_end(request):
     logger.info(f"Starting test: {request.node.name}")
     yield
     logger.info(f"Finished test: {request.node.name}")
-
 
 @pytest.fixture(scope="session")
 def api_context(playwright):
