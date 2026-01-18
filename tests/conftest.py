@@ -5,11 +5,15 @@ import os
 import sys
 import asyncio
 from typing import Generator
+from config import REPO_API_BASE,LOG_FILE
 
-# Setup logging
+# Setup logging - file and console
 os.makedirs("logs", exist_ok=True)
 logger.remove()
-logger.add("logs/tests.log",format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="5 MB", enqueue=True, serialize=False)
+# File logging with rotation
+logger.add(f"{LOG_FILE}", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", rotation="5 MB", enqueue=True, serialize=False)
+# Console logging for real-time visibility
+logger.add(sys.stdout, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", colorize=True)
 
 @pytest.fixture(scope="session")
 def browser_context(playwright: Playwright):
@@ -43,7 +47,7 @@ def api_context(playwright):
     reuse karna powerful hota hai.
     """
     context = playwright.request.new_context(
-        base_url="https://api.github.com"
+        base_url=f"{REPO_API_BASE}"
     )
     yield context
     context.dispose()
