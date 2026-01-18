@@ -1,7 +1,0 @@
-REPO_UI_URL = "https://github.com/microsoft/vscode"
-REPO_API_BASE = "https://api.github.com/repos"
-REACT_REPO = "repos/facebook/react"
-REACT_CONTENT_REPO = "repos/facebook/react/contents"
-NONEXISTENT_REPO = "repos/microsoft/nonexistent-repo-12345"
-LOG_FILE = "logs/tests.log"
-ISSUE_URL = "repos/facebook/react/issues/999999999"

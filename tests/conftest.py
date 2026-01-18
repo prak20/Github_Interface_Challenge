@@ -3,7 +3,6 @@ from playwright.sync_api import Page, expect, Playwright
 import pytest
 import os
 import sys
-import asyncio
 from typing import Generator
 from config import REPO_API_BASE, LOG_FILE
 
@@ -19,23 +18,13 @@ logger.add(f"{LOG_FILE}", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {messag
 # Console logging for real-time visibility
 logger.add(sys.stdout, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", colorize=True)
 
-# Add custom pytest option for browser selection
-def pytest_addoption(parser):
-    """Add --browser option to pytest command line."""
-    parser.addoption(
-        "--browser",
-        action="store",
-        default="chromium",
-        help="Browser to use: chromium, firefox, or webkit"
-    )
-
 def pytest_configure(config):
     """Log which browser will be used."""
     browser = config.getoption("--browser")
     logger.info(f"Browser selected: {browser}")
 
 @pytest.fixture(scope="session")
-def browser_context(playwright: Playwright, request):
+def browser_context(playwright: Playwright,request):
     """Create a browser context - browser selected via --browser option."""
     browser_name = request.config.getoption("--browser")
     logger.info(f"Launching {browser_name} browser")
@@ -47,7 +36,7 @@ def browser_context(playwright: Playwright, request):
         browser = playwright.webkit.launch(headless=False, slow_mo=500)
     else:
         logger.warning(f"Unknown browser '{browser_name}', using chromium")
-        browser = playwright.chromium.launch(headless=False, slow_mo=500)
+    browser = playwright.firefox.launch(headless=False, slow_mo=500)
     context = browser.new_context()
     yield context
     context.close()
