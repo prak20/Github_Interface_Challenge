@@ -58,6 +58,26 @@ def test_code_navigation_and_typescript_file(page):
     expect(line_numbers.first).to_be_visible()
     assert line_numbers.count() > 0
 
+def test_repo_stats_and_metadata(page):
+    page.goto(REPO_UI_URL)
+
+    about_section = page.locator("div.BorderGrid.about-margin")
+    expect(about_section).to_be_visible()
+
+    description = about_section.locator("p").filter(has_text=re.compile(".+")).first
+
+    expect(description).to_be_visible()
+    assert description.inner_text().strip() != ""
+    log_step(description.inner_text().strip())
+
+    license_link = about_section.locator("a").filter(has_text="license")
+
+    assert license_link.count() > 0, "License Information not found"
+
+    topics = page.locator("a.topic-tag")
+    assert topics.count() > 0, "Topics/tags not found"
+
+
 
 
 
